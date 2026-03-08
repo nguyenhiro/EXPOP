@@ -491,8 +491,8 @@ body {
 .game-list {
     padding: 20px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(2, 1fr); /* Cố định 2 cột cho cân đối trên mobile */
+    gap: 15px; /* Giảm khoảng cách */
     overflow-y: auto;
     flex: 1;
 }
@@ -509,6 +509,7 @@ body {
     border: 1px solid #334155;
     padding: 10px;
     box-sizing: border-box;
+    overflow: hidden; /* Ngăn nội dung tràn ra ngoài gây chồng lấn */
 }
 .game-item:hover {
     transform: translateY(-5px);
@@ -520,7 +521,7 @@ body {
     opacity: 0.5;
 }
 .game-item.disabled:hover { transform: none; box-shadow: none; border-color: #334155; }
-.game-icon { font-size: 8rem; margin-bottom: 0; line-height: 1; }
+.game-icon { font-size: 5rem; margin-bottom: 10px; line-height: 1; } /* Giảm kích thước icon */
 .game-name { font-size: 1.2rem; font-weight: 700; text-align: center; }
 
 .game-iframe {
@@ -586,8 +587,9 @@ body {
 /* Custom Caro (XO) Logo */
 .caro-logo {
     position: relative;
-    width: 7rem; /* Kích thước cố định cho logo */
-    height: 7rem;
+    width: 5rem; /* Điều chỉnh kích thước logo Caro cho đồng bộ */
+    height: 5rem;
+    margin-bottom: 10px;
     font-size: initial; /* Reset font-size từ .game-icon */
     display: flex;
     justify-content: center;
