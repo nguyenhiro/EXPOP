@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>EXPOP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1 class="app-title">EXPOP</h1>
+            <div id="user-status-container">
+                <div id="user-status" class="user-tag">👤 GUEST</div>
+                <button id="logout-btn" class="btn-logout" data-action="logout" style="display: none;">Đăng xuất</button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-view-container">
+            <!-- Login/Register View -->
+            <div id="auth-view" class="main-view view-centered">
+                <div id="login-intro-text" style="text-align: center; color: #cbd5e1; margin-bottom: 30px; max-width: 320px; line-height: 1.6; padding: 0 20px;">
+                    <h2 style="color: #38bdf8; margin-bottom: 10px; font-size: 1.8rem;">Xin chào!</h2>
+                    <p>Tôi là EXPOP, ứng dụng giải trí cá nhân miễn phí, bạn có thể chơi game, nghe nhạc, lưu ảnh cá nhân trên cùng một ứng dụng một cách đơn giản cùng BOT AI EXPOP.</p>
+                </div>
+                <div class="auth-form">
+                    <h3 id="auth-title">Đăng Nhập</h3>
+                    <input type="text" id="auth-name" placeholder="Tên tài khoản...">
+                    <input type="password" id="auth-pass" placeholder="Mật khẩu...">
+                    <input type="password" id="auth-pass-confirm" placeholder="Nhập lại mật khẩu..." style="display: none;">
+                    <button id="auth-submit-btn" class="btn-main" data-action="login">Đăng Nhập</button>
+                    <a href="#" id="auth-switch-link" data-action="switch-auth-mode">Chưa có tài khoản? Đăng ký</a>
+                </div>
+            </div>
+
+            <!-- Home View (Logged In) -->
+            <div id="home-view" class="main-view view-centered">
+                <div class="home-menu">
+                    <div class="home-menu-btn btn-music" data-action="open-music">
+                        <div class="btn-bg"></div>
+                        <div class="btn-content">
+                            <div class="music-wave-icon"><span></span><span></span><span></span><span></span></div>
+                            <span class="home-menu-label">Nghe Nhạc</span>
+                        </div>
+                    </div>
+                    <div class="home-menu-btn btn-game" data-action="open-games">
+                        <div class="btn-bg"></div>
+                        <div class="btn-content">
+                            <span class="home-menu-icon game-anim">🎮</span>
+                            <span class="home-menu-label">Mini Game</span>
+                        </div>
+                    </div>
+                    <div class="home-menu-btn btn-gallery" data-action="open-gallery">
+                        <div class="btn-bg"></div>
+                        <div class="btn-content">
+                            <span class="home-menu-icon gallery-anim">📸</span>
+                            <span class="home-menu-label">Kho Ảnh</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Music View -->
+            <div id="music-view" class="main-view">
+                <div class="page-header">
+                    <button class="btn-icon" data-action="back-to-home">⬅️</button>
+                    <h3>Âm Nhạc</h3>
+                    <button class="btn-icon" id="btn-shuffle" data-action="toggle-shuffle" style="margin-left: auto; margin-right: 5px;">🔀</button>
+                    <button class="btn-icon" id="btn-loop" data-action="toggle-loop" style="margin-right: 5px;">🔁</button>
+                    <button class="btn-icon" data-action="add-music" style="margin-right: 10px;">➕</button>
+                    <button id="music-vol-btn" class="vol-btn" data-action="toggle-mute">🔇</button>
+                </div>
+                <div id="music-feed" class="explore-feed scroll-hide"></div>
+            </div>
+
+            <!-- Games View -->
+            <div id="games-view" class="main-view">
+                <!-- Game Menu -->
+                <div id="game-menu-container" class="main-view active">
+                    <div class="page-header">
+                        <button class="btn-icon" data-action="back-to-home">⬅️</button>
+                        <h3>Kho Trò Chơi</h3>
+                    </div>
+                    <div class="game-list scroll-hide">
+                        <div class="game-item" data-action="play-game" data-game-url="caro.html" data-game-title="Cờ Caro">
+                            <div class="game-icon caro-logo">
+                                <span class="caro-o"></span>
+                                <span class="caro-x"></span>
+                            </div>
+                            <div class="game-name">Cờ Caro</div>
+                        </div>
+                        <div class="game-item" data-action="play-game" data-game-url="chess.html" data-game-title="Cờ Vua">
+                            <div class="game-icon" style="font-size: 7rem;">♔</div>
+                            <div class="game-name">Cờ Vua</div>
+                        </div>
+                        <div class="game-item" data-action="play-game" data-game-url="xiangqi.html" data-game-title="Cờ Tướng">
+                            <div class="game-icon" style="font-size: 7rem; color: #ef4444;">帥</div>
+                            <div class="game-name">Cờ Tướng</div>
+                        </div>
+                        <div class="game-item" data-action="play-game" data-game-url="go.html" data-game-title="Cờ Vây">
+                            <div class="game-icon" style="font-size: 7rem;">碁</div>
+                            <div class="game-name">Cờ Vây</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Game Player -->
+                <div id="game-player-container" class="main-view">
+                    <div class="page-header">
+                        <button class="btn-icon" data-action="back-to-game-menu">⬅️</button>
+                        <h3 id="game-player-title"></h3>
+                    </div>
+                    <iframe id="game-iframe" src="about:blank" class="game-iframe" frameborder="0" style="border: none;" allowtransparency="true"></iframe>
+                </div>
+            </div>
+
+            <!-- Gallery View -->
+            <div id="gallery-view" class="main-view">
+                <div class="page-header">
+                    <button class="btn-icon" data-action="back-to-home">⬅️</button>
+                    <h3>Kho Ảnh</h3>
+                    <button class="btn-icon" data-action="trigger-upload" style="margin-left: auto;">➕</button>
+                    <input type="file" id="photo-upload-input" accept="image/*" style="display: none;" multiple>
+                </div>
+                <div id="gallery-grid" class="gallery-grid scroll-hide"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="state.js"></script>
+    <script src="db.js"></script>
+    <script src="media.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

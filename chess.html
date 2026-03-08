@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cờ Vua</title>
+    <!-- Lấy các style chung từ caro.html và điều chỉnh -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #game-board {
+            width: min(95vw, calc(100vh - 100px));
+            height: min(95vw, calc(100vh - 100px));
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            border: 4px solid #604020;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(24px, 8vw, 60px);
+            user-select: none;
+            color: #333;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .square.light { background-color: #f0d9b5; }
+        .square.dark { background-color: #b58863; }
+        
+        .piece {
+            cursor: grab;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            pointer-events: none; /* Để click xuyên qua quân cờ vào ô */
+        }
+        .piece:active { cursor: grabbing; }
+
+        .square.selected {
+            background-color: #f6f669 !important;
+        }
+
+        /* Gợi ý nước đi */
+        .valid-move-dot {
+            width: 30%;
+            height: 30%;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: none;
+        }
+        .capture-hint::before {
+            content: '';
+            position: absolute;
+            top: 5%; bottom: 5%; left: 5%; right: 5%;
+            border: 4px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            box-sizing: border-box;
+        }
+        .in-check {
+            background-color: #ff6b6b !important;
+        }
+
+        /* UI Styles copied from caro.html */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        .overlay.hidden { display: none; }
+        h1 { color: #f0d9b5; font-size: 3rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 20px rgba(240, 217, 181, 0.5); }
+        .btn { background: linear-gradient(135deg, #8d6e63 0%, #604020 100%); border: none; padding: 15px 40px; margin: 10px; border-radius: 50px; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; min-width: 200px; box-shadow: 0 4px 15px rgba(96, 64, 32, 0.4); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(96, 64, 32, 0.6); }
+        .btn:active { transform: scale(0.95); }
+        .btn-secondary { background: #334155; box-shadow: none; border: 1px solid #475569; }
+        .btn-secondary:hover { background: #475569; }
+        
+        /* HUD Gọn gàng */
+        .game-ui { 
+            width: min(95vw, calc(100vh - 100px));
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; box-sizing: border-box; margin-bottom: 15px;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .game-ui button { pointer-events: auto; padding: 6px 12px; font-size: 0.9rem; min-width: auto; border-radius: 8px; margin: 0; }
+        .center-hud { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+        .action-buttons { display: flex; gap: 10px; }
+        .timers-container { display: flex; gap: 15px; }
+        .timer-box { background: rgba(0, 0, 0, 0.3); padding: 5px 10px; border-radius: 8px; color: white; font-weight: bold; border: 2px solid transparent; min-width: 70px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; transition: all 0.3s ease; }
+        .timer-box.active { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #timer-w { border-color: #f0d9b5; color: #f0d9b5; }
+        #timer-w.active { background: rgba(240, 217, 181, 0.15); box-shadow: 0 0 20px rgba(240, 217, 181, 0.4); }
+        #timer-b { border-color: #604020; color: #604020; }
+        #timer-b.active { background: rgba(96, 64, 32, 0.15); box-shadow: 0 0 20px rgba(96, 64, 32, 0.4); }
+        .player-title { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; line-height: 1.2; }
+        .time-val { font-size: 0.85rem; opacity: 0.9; font-family: monospace; }
+        
+        .guide-content { text-align: left; line-height: 1.6; color: #e2e8f0; max-height: 60vh; overflow-y: auto; padding: 0 20px; }
+    </style>
+</head>
+<body>
+    <!-- Màn hình Menu -->
+    <div id="start-screen" class="overlay">
+        <h1>Cờ Vua</h1>
+        <!-- Thêm phần cài đặt thời gian cho đồng bộ -->
+        <div class="settings-container" style="margin-bottom: 20px; color: #cbd5e1; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <div class="setting-item" style="display: flex; align-items: center; gap: 10px;">
+                <label for="time-limit" style="font-size: 1rem;">Thời gian (1-30 phút):</label>
+                <input type="number" id="time-limit" value="5" min="1" max="30" style="width: 60px; padding: 8px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; text-align: center; font-size: 1rem;">
+            </div>
+        </div>
+        <button class="btn" id="btn-pve">Chơi với Bot 🤖</button>
+        <button class="btn btn-secondary" id="btn-pvp">Chơi với Bạn 👥</button>
+        <button class="btn btn-secondary" id="btn-guide">Hướng dẫn 📖</button>
+    </div>
+
+    <!-- Màn hình Hướng dẫn -->
+    <div id="guide-screen" class="overlay hidden">
+        <h1 style="font-size: 2rem; margin-bottom: 20px;">Cách Chơi</h1>
+        <div class="guide-content">
+            <p><strong>1. Mục tiêu:</strong> Chiếu hết (Checkmate) Vua của đối phương.</p>
+            <p><strong>2. Di chuyển:</strong></p>
+            <ul style="margin-top: 5px; padding-left: 20px;">
+                <li><strong>Tốt:</strong> Đi thẳng 1 ô (2 ô nước đầu), ăn chéo.</li>
+                <li><strong>Xe:</strong> Đi ngang, dọc không giới hạn.</li>
+                <li><strong>Mã:</strong> Đi hình chữ L (nhảy qua quân khác).</li>
+                <li><strong>Tượng:</strong> Đi chéo không giới hạn.</li>
+                <li><strong>Hậu:</strong> Đi ngang, dọc, chéo (kết hợp Xe + Tượng).</li>
+                <li><strong>Vua:</strong> Đi 1 ô mọi hướng.</li>
+            </ul>
+            <p><strong>3. Luật đặc biệt:</strong> Nhập thành, Phong cấp Tốt, Bắt Tốt qua đường.</p>
+        </div>
+        <button class="btn" id="btn-close-guide" style="margin-top: 20px;">Đã hiểu</button>
+    </div>
+
+    <div id="ingame-menu" class="overlay hidden">
+        <h1>Menu</h1>
+        <button class="btn btn-secondary" id="btn-surrender">Đầu hàng 🏳️</button>
+        <button class="btn btn-secondary" id="btn-quit">Trở về 🏠</button>
+        <button class="btn btn-secondary" id="btn-close-menu">Đóng</button>
+    </div>
+
+    <!-- Màn hình Kết quả -->
+    <div id="result-screen" class="overlay hidden">
+        <h1 id="result-title">Kết Quả</h1>
+        <p id="result-message" style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 30px; text-align: center; padding: 0 20px; line-height: 1.5;"></p>
+        <button class="btn" id="btn-result-restart">Chơi lại 🔄</button>
+        <button class="btn btn-secondary" id="btn-result-menu">Menu 🏠</button>
+    </div>
+
+    <div class="game-ui" id="game-ui" style="display: none;">
+        <div class="timers-container">
+            <div id="timer-w" class="timer-box active"></div>
+            <div id="timer-b" class="timer-box"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="btn-restart">Chơi lại</button>
+            <button class="btn btn-secondary" id="btn-menu">Menu</button>
+        </div>
+    </div>
+
+    <div id="game-board"></div>
+    <script src="chess.js"></script>
+</body>
+</html>
+        }
+    </style>
+</head>
+<body>
+    <div id="game-board"></div>
+    <script src="chess.js"></script>
+</body>
+</html>

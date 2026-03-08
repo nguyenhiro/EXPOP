@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cờ Vây</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #game-board {
+            width: min(95vw, calc(100vh - 120px));
+            height: min(95vw, calc(100vh - 120px));
+            background-color: #e3c083; /* Màu gỗ Kaya truyền thống */
+            border: 2px solid #5e4020;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: grid;
+            grid-template-columns: repeat(19, 1fr);
+            grid-template-rows: repeat(19, 1fr);
+            position: relative;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        .intersection {
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Vẽ đường kẻ */
+        .intersection::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #000; }
+        .intersection::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
+        
+        /* Xử lý các điểm biên để đường kẻ không bị thừa ra ngoài */
+        .intersection.top::before { top: 50%; }
+        .intersection.bottom::before { bottom: 50%; }
+        .intersection.left::after { left: 50%; }
+        .intersection.right::after { right: 50%; }
+
+        /* Điểm sao (Hoshi) */
+        .star-point {
+            width: 20%; height: 20%; background: #000; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1;
+        }
+
+        /* Quân cờ */
+        .stone {
+            width: 90%; height: 90%; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .stone.black { background: radial-gradient(circle at 30% 30%, #444, #000); }
+        .stone.white { background: radial-gradient(circle at 30% 30%, #fff, #ddd); }
+
+        /* UI Overlay & Buttons */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        .overlay.hidden { display: none; }
+        h1 { color: #e3c083; font-size: 3rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; }
+        .btn { background: linear-gradient(135deg, #d4af37 0%, #a67c00 100%); border: none; padding: 15px 40px; margin: 10px; border-radius: 50px; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; min-width: 200px; box-shadow: 0 4px 15px rgba(166, 124, 0, 0.4); }
+        .btn:hover { transform: translateY(-3px); }
+        .btn-secondary { background: #334155; box-shadow: none; border: 1px solid #475569; }
+        
+        /* HUD */
+        .game-ui { 
+            width: min(95vw, calc(100vh - 120px)); /* Căn theo chiều rộng bàn cờ */
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; box-sizing: border-box; color: white; margin-bottom: 15px;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .timers-container { display: flex; gap: 15px; }
+        .timer-box { background: rgba(0, 0, 0, 0.3); padding: 5px 10px; border-radius: 8px; color: white; font-weight: bold; border: 2px solid transparent; min-width: 70px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; transition: all 0.3s ease; }
+        .timer-box.active { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #timer-b { border-color: #000; color: #aaa; background: #1e293b; }
+        #timer-b.active { box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); border-color: #fff; }
+        #timer-w { border-color: #fff; color: #fff; background: #64748b; }
+        #timer-w.active { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); border-color: #000; }
+        .player-title { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; line-height: 1.2; }
+        .time-val { font-size: 0.85rem; opacity: 0.9; font-family: monospace; }
+        
+        .settings-container { margin-bottom: 20px; color: #cbd5e1; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .setting-item { display: flex; align-items: center; gap: 10px; }
+        .setting-item label { font-size: 1rem; }
+        .setting-item input { width: 60px; padding: 8px; background: #0f172a; border: 1px solid #334155; color: #fff; border-radius: 8px; text-align: center; font-size: 1rem; }
+        
+        /* Thêm style cho các nhóm nút để sắp xếp lại */
+        .controls-container { display: flex; flex-direction: column; gap: 6px; align-items: stretch; min-width: 120px; }
+        .controls-row { display: flex; gap: 6px; }
+        .btn-full { width: 100%; }
+        .btn-half { flex: 1; }
+        .btn-small { padding: 6px 12px; font-size: 0.9rem; min-width: auto; border-radius: 8px; margin: 0; }
+        .guide-content { text-align: left; line-height: 1.6; color: #e2e8f0; max-height: 60vh; overflow-y: auto; padding: 0 20px; }
+
+        /* Style cho bảng kết quả đẹp hơn */
+        #result-message { width: 100%; max-width: 350px; padding: 0 10px; text-align: center; }
+        .result-breakdown {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            text-align: left;
+            color: #fff;
+        }
+        .result-player-score {
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            flex: 1;
+        }
+        .result-player-score h3 { margin: 0 0 8px 0; font-size: 1.1rem; border-bottom: 1px solid #475569; padding-bottom: 8px; }
+        .result-player-score ul { list-style: none; padding: 0; margin: 0; line-height: 1.9; }
+        .result-player-score ul li span { float: right; font-weight: bold; }
+        .winner-message { font-size: 1.4rem; font-weight: bold; }
+        .winner-message.black { color: #4ade80; }
+        .winner-message.white { color: #f87171; }
+    </style>
+</head>
+<body>
+    <!-- Màn hình Menu Chính -->
+    <div id="start-screen" class="overlay">
+        <h1>Cờ Vây</h1>
+        <div class="settings-container">
+            <div class="setting-item">
+                <label for="time-limit">Thời gian (1-60 phút):</label>
+                <input type="number" id="time-limit" value="10" min="1" max="60">
+            </div>
+        </div>
+        <button class="btn" id="btn-pve">Chơi với Bot 🤖</button>
+        <button class="btn btn-secondary" id="btn-pvp">Chơi với Bạn 👥</button>
+        <button class="btn btn-secondary" id="btn-guide">Hướng dẫn 📖</button>
+    </div>
+
+    <!-- Màn hình Hướng dẫn -->
+    <div id="guide-screen" class="overlay hidden">
+        <h1 style="font-size: 2rem; margin-bottom: 20px;">Cách Chơi</h1>
+        <div class="guide-content">
+            <p><strong>1. Mục tiêu:</strong> Chiếm được nhiều đất (giao điểm) hơn đối thủ.</p>
+            <p><strong>2. Đặt quân:</strong> Đen đi trước. Đặt quân vào các giao điểm trống.</p>
+            <p><strong>3. Khí & Bắt quân:</strong> "Khí" là các giao điểm trống sát cạnh quân cờ. Nếu một nhóm quân mất hết khí, nó sẽ bị bắt và đưa ra khỏi bàn.</p>
+            <p><strong>4. Luật Ko:</strong> Không được đi nước lặp lại trạng thái bàn cờ ngay lập tức trước đó.</p>
+            <p><strong>5. Kết thúc:</strong> Khi cả hai người chơi cùng "Bỏ lượt" (Pass), ván cờ kết thúc.</p>
+        </div>
+        <button class="btn" id="btn-close-guide" style="margin-top: 20px;">Đã hiểu</button>
+    </div>
+
+    <!-- Menu Trong Game -->
+    <div id="ingame-menu" class="overlay hidden">
+        <h1>Menu</h1>
+        <button class="btn btn-secondary" id="btn-surrender">Đầu hàng 🏳️</button>
+        <button class="btn btn-secondary" id="btn-quit">Trở về 🏠</button>
+        <button class="btn btn-secondary" id="btn-close-menu">Đóng</button>
+    </div>
+
+    <!-- Màn hình Kết quả -->
+    <div id="result-screen" class="overlay hidden">
+        <h1 id="result-title">Kết Quả</h1>
+        <div id="result-message"></div>
+        <button class="btn" id="btn-result-restart">Chơi lại 🔄</button>
+        <button class="btn btn-secondary" id="btn-result-menu">Menu 🏠</button>
+    </div>
+
+    <!-- Giao diện thông tin (HUD) -->
+    <div class="game-ui" id="game-ui" style="display: none;">
+        <!-- Timers (Left) -->
+        <div class="timers-container">
+            <div id="timer-b" class="timer-box active"></div>
+            <div id="timer-w" class="timer-box"></div>
+        </div>
+        
+        <!-- Controls (Right) -->
+        <div class="controls-container">
+            <button class="btn btn-secondary btn-small btn-full" id="btn-pass">Bỏ lượt</button>
+            <div class="controls-row">
+                <button class="btn btn-secondary btn-small btn-half" id="btn-restart">Chơi lại</button>
+                <button class="btn btn-secondary btn-small btn-half" id="btn-menu">Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-board"></div>
+    <script src="go.js"></script>
+</body>
+</html>

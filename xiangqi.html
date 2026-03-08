@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cờ Tướng</title>
+    <!-- Lấy style từ các game khác và tùy chỉnh cho Cờ Tướng -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        #board-wrapper {
+            position: relative;
+            /* Lấy kích thước từ #game-board cũ */
+            width: min(95vw, calc(100vh - 100px) * 9 / 10);
+            height: min(95vw * 10 / 9, calc(100vh - 100px));
+        }
+
+        #game-board {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            position: relative;
+        }
+
+        .point { /* Các giao điểm trên bàn cờ */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Vẽ đường kẻ và cung điện */
+        #board-decorations {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0; /* Lấp đầy wrapper */
+            background-color: #f0d9b5; /* Chuyển màu nền vào đây */
+            border: none; /* Xóa border, để JS vẽ toàn bộ cho đồng nhất */
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Chuyển bóng đổ vào đây */
+            box-sizing: border-box; /* Đảm bảo border nằm bên trong */
+            pointer-events: none;
+        }
+        .line { position: absolute; background: #604020; }
+        .river-label {
+            position: absolute;
+            top: 50%;
+            font-size: 1.5em;
+            color: #f0d9b5; /* Đổi thành màu sáng (màu nền bàn cờ) để nổi bật trên sông */
+            opacity: 0.7; /* Tăng độ rõ nét */
+            letter-spacing: 1em;
+            writing-mode: horizontal-tb;
+            pointer-events: none;
+            white-space: nowrap; /* Ngăn các chữ bị xuống hàng */
+        }
+        .marker {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: rgba(96, 64, 32, 0.7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .piece {
+            width: 88%;
+            height: 88%;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(20px, 4.5vw, 38px);
+            font-weight: bold;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            border: 2px solid #333;
+            background: #fffaf0;
+            user-select: none;
+            pointer-events: none; /* Để click xuyên qua quân cờ vào ô */
+            transition: transform 0.1s;
+        }
+        .piece.r { color: #d93025; }
+        .piece.b { color: #202124; }
+
+        .point.selected .piece {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #f6f669;
+        }
+        .point.in-check .piece {
+            border-color: #ff6b6b;
+            animation: pulse-check 1s infinite;
+        }
+        @keyframes pulse-check { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        /* Gợi ý nước đi */
+        .valid-move-dot { width: 30%; height: 30%; background-color: rgba(0, 0, 0, 0.2); border-radius: 50%; position: absolute; pointer-events: none; }
+        .capture-hint::after { content: ''; position: absolute; top: 5%; bottom: 5%; left: 5%; right: 5%; border: 4px solid rgba(217, 48, 37, 0.5); border-radius: 50%; box-sizing: border-box; }
+
+        /* UI Styles copied from chess.html */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        .overlay.hidden { display: none; }
+        h1 { color: #f0d9b5; font-size: 3rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 20px rgba(240, 217, 181, 0.5); }
+        .btn { background: linear-gradient(135deg, #d93025 0%, #a52a2a 100%); border: none; padding: 15px 40px; margin: 10px; border-radius: 50px; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; min-width: 200px; box-shadow: 0 4px 15px rgba(217, 48, 37, 0.4); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(217, 48, 37, 0.6); }
+        .btn:active { transform: scale(0.95); }
+        .btn-secondary { background: #334155; box-shadow: none; border: 1px solid #475569; }
+        .btn-secondary:hover { background: #475569; }
+        
+        /* HUD Gọn gàng */
+        .game-ui { 
+            width: min(95vw, calc(100vh - 100px) * 9 / 10); /* Căn theo chiều rộng bàn cờ */
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; box-sizing: border-box; margin-bottom: 15px;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .game-ui button { pointer-events: auto; padding: 6px 12px; font-size: 0.9rem; min-width: auto; border-radius: 8px; margin: 0; }
+        .center-hud { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+        .action-buttons { display: flex; gap: 10px; }
+        .timers-container { display: flex; gap: 15px; }
+        .timer-box { background: rgba(0, 0, 0, 0.3); padding: 5px 10px; border-radius: 8px; color: white; font-weight: bold; border: 2px solid transparent; min-width: 70px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; transition: all 0.3s ease; }
+        .timer-box.active { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        #timer-r { border-color: #d93025; color: #d93025; }
+        #timer-r.active { background: rgba(217, 48, 37, 0.15); box-shadow: 0 0 20px rgba(217, 48, 37, 0.4); }
+        #timer-b { border-color: #604020; color: #604020; }
+        #timer-b.active { background: rgba(96, 64, 32, 0.15); box-shadow: 0 0 20px rgba(96, 64, 32, 0.4); }
+        .player-title { font-size: 0.9rem; font-weight: 900; text-transform: uppercase; line-height: 1.2; }
+        .time-val { font-size: 0.85rem; opacity: 0.9; font-family: monospace; }
+        
+        .guide-content { text-align: left; line-height: 1.6; color: #e2e8f0; max-height: 60vh; overflow-y: auto; padding: 0 20px; }
+
+        /* Style cho phần cài đặt thời gian */
+        .settings-container {
+            margin-bottom: 20px;
+            color: #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .setting-item label {
+            font-size: 1rem;
+        }
+        .setting-item input {
+            width: 60px;
+            padding: 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Màn hình Menu -->
+    <div id="start-screen" class="overlay">
+        <h1>Cờ Tướng</h1>
+        <div class="settings-container">
+            <div class="setting-item">
+                <label for="time-limit">Thời gian (1-30 phút):</label>
+                <input type="number" id="time-limit" value="5" min="1" max="30">
+            </div>
+        </div>
+        <button class="btn" id="btn-pve">Chơi với Bot 🤖</button>
+        <button class="btn btn-secondary" id="btn-pvp">Chơi với Bạn 👥</button>
+        <button class="btn btn-secondary" id="btn-guide">Hướng dẫn 📖</button>
+    </div>
+
+    <!-- Màn hình Hướng dẫn -->
+    <div id="guide-screen" class="overlay hidden">
+        <h1 style="font-size: 2rem; margin-bottom: 20px;">Cách Chơi</h1>
+        <div class="guide-content">
+            <p><strong>1. Mục tiêu:</strong> Chiếu bí Tướng của đối phương.</p>
+            <p><strong>2. Di chuyển:</strong></p>
+            <ul style="margin-top: 5px; padding-left: 20px;">
+                <li><strong>Xe:</strong> Ngang dọc tự do.</li>
+                <li><strong>Mã:</strong> Đi chữ L (bị cản nếu có quân chặn).</li>
+                <li><strong>Pháo:</strong> Đi như Xe, nhưng ăn quân phải nhảy qua 1 quân khác (ngòi).</li>
+                <li><strong>Tượng/Sĩ/Tướng:</strong> Có vùng di chuyển hạn chế (Cung, Sông).</li>
+            </ul>
+        </div>
+        <button class="btn" id="btn-close-guide" style="margin-top: 20px;">Đã hiểu</button>
+    </div>
+
+    <div id="ingame-menu" class="overlay hidden">
+        <h1>Menu</h1>
+        <button class="btn btn-secondary" id="btn-surrender">Đầu hàng 🏳️</button>
+        <button class="btn btn-secondary" id="btn-quit">Trở về 🏠</button>
+        <button class="btn btn-secondary" id="btn-close-menu">Đóng</button>
+    </div>
+
+    <!-- Màn hình Kết quả -->
+    <div id="result-screen" class="overlay hidden">
+        <h1 id="result-title">Kết Quả</h1>
+        <p id="result-message" style="color: #e2e8f0; font-size: 1.2rem; margin-bottom: 30px; text-align: center; padding: 0 20px; line-height: 1.5;"></p>
+        <button class="btn" id="btn-result-restart">Chơi lại 🔄</button>
+        <button class="btn btn-secondary" id="btn-result-menu">Menu 🏠</button>
+    </div>
+
+    <div class="game-ui" id="game-ui" style="display: none;">
+        <div class="timers-container">
+            <div id="timer-r" class="timer-box active"></div>
+            <div id="timer-b" class="timer-box"></div>
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="btn-restart">Chơi lại</button>
+            <button class="btn btn-secondary" id="btn-menu">Menu</button>
+        </div>
+    </div>
+
+    <div id="board-wrapper">
+        <div id="board-decorations"></div>
+        <div id="game-board"></div>
+    </div>
+    <script src="xiangqi.js"></script>
+</body>
+</html>

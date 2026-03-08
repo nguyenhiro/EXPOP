@@ -1,0 +1,665 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ExpOnePlay v11 - Styles */
+:root { 
+    --primary: #38bdf8; 
+    --success: #22c55e; 
+    --danger: #ef4444; 
+    --bg: #020617; 
+    --mobile-w: 414px; 
+    --mobile-h: 850px; 
+}
+
+* { 
+    margin: 0; padding: 0; box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; 
+}
+
+body { 
+    background: #000; color: #f8fafc;
+    font-family: 'Be Vietnam Pro', sans-serif; 
+    display: flex; justify-content: center; align-items: center; 
+    height: 100dvh; overflow: hidden; /* Use dvh for better mobile support */
+}
+
+/* KHUNG APP */
+.app-container { 
+    width: 100%; height: 100%; max-width: var(--mobile-w); max-height: var(--mobile-h); 
+    background: linear-gradient(180deg, #0f0c29, #302b63, #24243e); /* Futuristic Gradient */
+    position: relative; overflow: hidden; 
+    display: flex; flex-direction: column; border: 1px solid #1e293b; 
+}
+
+/* Chế độ toàn màn hình cho game */
+.app-container.fullscreen-mode {
+    max-width: 100%;
+    max-height: 100%;
+    border: none;
+    /* Thêm transition để hiệu ứng mượt mà hơn */
+    transition: max-width 0.3s ease, max-height 0.3s ease;
+}
+
+@media (max-width: 450px) { 
+    .app-container { max-width: 100vw; max-height: 100dvh; border: none; } 
+}
+
+/* CÔNG CỤ ẨN THANH CUỘN TOÀN CỤC */
+.scroll-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.scroll-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* HEADER */
+.header { 
+    padding: 15px 20px;
+    display: flex; justify-content: space-between; 
+    align-items: center; background: rgba(15,23,42,0.85); z-index: 10; 
+    backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+.app-title { font-size: 1.5rem; color: #fff; margin: 0; }
+.user-tag { font-weight: 700; color: var(--primary); font-size: 0.9rem; }
+.btn-logout {
+    background: none; border: 1px solid #ef4444; color: #ef4444;
+    padding: 5px 10px; border-radius: 8px; font-size: 0.8rem;
+    margin-left: 10px; cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-logout:hover { background: #ef4444; color: white; }
+.user-status-container {
+    display: flex;
+    align-items: center;
+}
+
+/* MAIN VIEWS (Home, Collection, Games, etc.) */
+.main-view-container {
+    flex: 1; position: relative; overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.main-view {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+}
+.main-view.active {
+    display: flex; /* Show when active */
+    animation: viewFadeIn 0.3s ease-out;
+}
+
+/* Center content for specific views like auth and home */
+.main-view.view-centered {
+    justify-content: center;
+    align-items: center;
+}
+
+/* AUTH VIEW */
+.auth-form {
+    width: 80%; max-width: 300px;
+    display: flex; flex-direction: column; gap: 15px;
+}
+.auth-form h3 { text-align: center; margin-bottom: 10px; font-size: 1.5rem; }
+.auth-form input {
+    width: 100%; padding: 15px; background: #0f172a; 
+    border: 1px solid #334155; color: #fff; border-radius: 14px; outline: none; 
+}
+.auth-form input:focus { border-color: var(--primary); }
+.auth-form a {
+    color: var(--primary); text-decoration: none;
+    font-size: 0.9rem; text-align: center;
+}
+
+/* HOME VIEW */
+.home-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    padding: 40px;
+    overflow-y: auto;
+}
+.home-menu-btn {
+    height: 120px;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.home-menu-btn:active { transform: scale(0.98); }
+.home-menu-btn .btn-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    transition: transform 0.5s;
+    z-index: 1;
+}
+.home-menu-btn:hover .btn-bg { transform: scale(1.1); }
+
+/* Banner Styles */
+.btn-music .btn-bg {
+    background: linear-gradient(45deg, #ff00cc, #333399);
+}
+.btn-game .btn-bg {
+    background: linear-gradient(45deg, #00dbde, #fc00ff);
+}
+.btn-gallery .btn-bg {
+    background: linear-gradient(45deg, #f857a6, #ff5858);
+}
+
+.home-menu-btn .btn-content {
+    position: relative; z-index: 2;
+    height: 100%; width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    color: #fff;
+    background: rgba(0,0,0,0.2); /* Overlay làm tối để rõ chữ */
+    backdrop-filter: blur(2px);
+}
+.home-menu-icon { font-size: 3rem; }
+.home-menu-label { 
+    font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* ANIMATIONS */
+/* Music Wave Animation inside Button */
+.music-wave-icon {
+    display: flex; align-items: flex-end; gap: 4px; height: 40px;
+}
+.music-wave-icon span {
+    width: 8px; background: #fff; border-radius: 4px;
+    animation: wave 1s infinite ease-in-out;
+}
+.music-wave-icon span:nth-child(1) { height: 20px; animation-delay: 0.1s; }
+.music-wave-icon span:nth-child(2) { height: 40px; animation-delay: 0.2s; }
+.music-wave-icon span:nth-child(3) { height: 30px; animation-delay: 0.3s; }
+.music-wave-icon span:nth-child(4) { height: 25px; animation-delay: 0.4s; }
+@keyframes wave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.5); }
+}
+
+/* Game Controller Shake */
+.game-anim {
+    display: inline-block;
+    animation: tilt-shaking 2s infinite;
+}
+@keyframes tilt-shaking {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Gallery Flash */
+.gallery-anim {
+    display: inline-block;
+    filter: drop-shadow(0 0 0 rgba(255,255,255,0));
+    animation: flash 3s infinite;
+}
+@keyframes flash {
+    0%, 90%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); transform: scale(1); }
+    92% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)); transform: scale(1.1); }
+    94% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); transform: scale(1); }
+}
+
+/* TRANG XU HƯỚNG (ẨN THANH CUỘN DỌC) */
+.explore-feed, #music-feed { 
+    flex: 1; overflow-y: auto; 
+    scroll-snap-type: y mandatory; 
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+    background: #000; 
+}
+.v-unit { 
+    height: 100%; width: 100%; scroll-snap-align: start; 
+    scroll-snap-stop: always;
+    position: relative; background: #000; overflow: hidden;
+}
+.v-unit iframe { width: 100%; height: 100%; border: none; }
+
+.v-wrapper {
+    width: 100%; height: 100%;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+}
+
+/* THUMBNAIL & LOADING SPINNER */
+.v-unit-thumb {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 5;
+    transition: opacity 0.4s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+.v-unit-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+.v-unit.is-loaded .v-unit-thumb {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* NÚT LOA DUY NHẤT */
+.vol-btn { 
+    width: 32px; height: 32px; border-radius: 50%; 
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+    color: white; cursor: pointer; backdrop-filter: blur(10px); 
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease; font-size: 0.9rem;
+}
+.vol-btn:hover { background: var(--primary); color: #000; }
+
+.btn-main { 
+    flex: 1; height: 50px; border-radius: 16px; border: none; 
+    background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); 
+    color: #fff; font-weight: 800; cursor: pointer; 
+}
+.btn-main:active { transform: scale(0.98); }
+
+.btn-icon { 
+    width: 50px; height: 50px; border-radius: 16px; border: 1px solid #334155; 
+    background: #1e293b; color: #fff; font-size: 1.2rem; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; 
+}
+.btn-icon:active { transform: scale(0.95); }
+/* Active state for toggle buttons */
+.btn-icon.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.page-header { 
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #1e293b; background: rgba(15,23,42,0.9); 
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* TOAST NOTIFICATION */
+.toast {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: #1e293b; color: white; padding: 12px 24px;
+    border-radius: 10px; z-index: 9999; font-weight: 500; /* Tăng z-index để hiện trên game overlay */
+    border: 1px solid #334155; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    animation: popupFadeIn 0.3s ease;
+    text-align: center;
+}
+.toast.success { border-color: var(--success); }
+.toast.error { border-color: var(--danger); }
+
+@keyframes popupFadeIn {
+    from { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* EMPTY STATE */
+.empty-state {
+    padding: 100px 20px; text-align: center; color: #64748b;
+}
+
+/* RIPPLE EFFECT */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background-color: rgba(255, 255, 255, 0.3);
+    pointer-events: none;
+}
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Enable ripple on interactive elements */
+.btn-main, .btn-icon, .home-menu-btn, .game-item {
+    position: relative;
+    overflow: hidden;
+}
+
+/* SKELETON LOADER */
+.skeleton-loader {
+    height: 300px; /* Chiều cao tương đương một video */
+    background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #64748b;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* MUSIC VISUALIZER */
+.music-visualizer {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+    display: flex; align-items: flex-end; justify-content: center; gap: 6px;
+    z-index: 15; pointer-events: none;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+    padding-bottom: 20px; opacity: 0; transition: opacity 0.5s;
+}
+
+.v-unit.playing .music-visualizer { opacity: 1; }
+
+.viz-bar {
+    width: 8px; background: var(--primary); border-radius: 4px;
+    height: 10px;
+    animation: viz-wave var(--d) ease-in-out infinite alternate;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+@keyframes viz-wave {
+    0% { height: 10px; opacity: 0.5; }
+    100% { height: var(--h); opacity: 1; }
+}
+
+/* DELETE VIDEO BUTTON */
+.btn-delete-video {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ef4444; font-size: 1.2rem;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 20;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s;
+}
+.btn-delete-video:hover { background: #ef4444; color: white; transform: scale(1.1); }
+
+/* OPEN YOUTUBE BUTTON */
+.btn-open-yt {
+    position: absolute;
+    top: 20px;
+    right: 70px; /* Bên trái nút xóa */
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #38bdf8; font-size: 1.2rem;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 20;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-open-yt:hover { background: #38bdf8; color: white; transform: scale(1.1); }
+
+/* SKIP VIDEO BUTTON */
+.btn-toggle-skip {
+    position: absolute;
+    top: 20px;
+    right: 120px; /* Bên trái nút mở YT */
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff; font-size: 1.2rem;
+    display: flex; justify-content: center; align-items: center;
+    cursor: pointer; z-index: 20;
+    backdrop-filter: blur(5px);
+    transition: all 0.2s;
+}
+.btn-toggle-skip:hover { background: #fff; color: #000; transform: scale(1.1); }
+.v-unit.skipped .btn-toggle-skip { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+
+/* Skipped state visual */
+.v-unit.skipped .v-wrapper iframe {
+    opacity: 0.3;
+    pointer-events: none;
+}
+.v-unit.skipped::after {
+    content: 'ĐÃ BỎ QUA';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #f59e0b;
+    font-size: 1.5rem; font-weight: bold;
+    pointer-events: none; z-index: 10;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* VIDEO TIMER */
+.video-timer {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 20;
+    pointer-events: none;
+    font-family: monospace; /* Dùng font đơn cách để số không bị nhảy */
+}
+
+/* GAME LIST & PLAYER */
+/* Đảm bảo view game có nền gradient giống app chính */
+#games-view {
+    background: linear-gradient(180deg, #0f0c29, #302b63, #24243e);
+}
+
+.game-list {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+.game-item {
+    aspect-ratio: 1;
+    background-color: #1e293b;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #334155;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.game-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    border-color: var(--primary);
+}
+.game-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.game-item.disabled:hover { transform: none; box-shadow: none; border-color: #334155; }
+.game-icon { font-size: 8rem; margin-bottom: 0; line-height: 1; }
+.game-name { font-size: 1.2rem; font-weight: 700; text-align: center; }
+
+.game-iframe {
+    width: 100%;
+    height: 100%;        /* Chiếm toàn bộ chiều cao còn lại */
+    background: transparent;
+    border: none !important;
+    flex: 1;             /* Tự động giãn để lấp đầy khung */
+    display: block;
+    overflow: hidden;
+    box-shadow: none !important;
+    aspect-ratio: auto !important;
+}
+
+/* GALLERY GRID */
+.gallery-grid {
+    flex: 1;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+    overflow-y: auto;
+    align-content: start;
+}
+.gallery-item {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255,255,255,0.1);
+    background: #000;
+}
+.gallery-item img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.3s;
+    cursor: zoom-in;
+}
+.gallery-item:hover img { transform: scale(1.1); }
+
+.btn-delete-photo {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ef4444;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    backdrop-filter: blur(2px);
+    transition: all 0.2s;
+    z-index: 2;
+}
+.btn-delete-photo:hover {
+    background: #ef4444; color: white; transform: scale(1.1);
+}
+
+/* Custom Caro (XO) Logo */
+.caro-logo {
+    position: relative;
+    width: 7rem; /* Kích thước cố định cho logo */
+    height: 7rem;
+    font-size: initial; /* Reset font-size từ .game-icon */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.caro-logo .caro-o {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 12px solid #ef4444; /* Màu đỏ từ trong game */
+    border-radius: 50%;
+    box-sizing: border-box;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    transform: rotate(-15deg); /* Nghiêng nhẹ cho sinh động */
+}
+
+.caro-logo .caro-x {
+    position: absolute;
+    width: 85%; /* Chữ X to hơn đường kính trong của O một chút */
+    height: 85%;
+}
+
+.caro-logo .caro-x::before,
+.caro-logo .caro-x::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 14px; /* Độ dày của chữ X */
+    background-color: #38bdf8; /* Màu xanh từ trong game */
+    border-radius: 7px;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+}
+
+.caro-logo .caro-x::before {
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.caro-logo .caro-x::after {
+    transform: translateY(-50%) rotate(-45deg);
+}
+
+/* OVERLAY / MODAL FULLSCREEN */
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.95);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 9998; /* Dưới Toast một chút */
+    backdrop-filter: blur(10px);
+    animation: overlayFadeIn 0.2s ease;
+}
+.overlay.hidden { display: none; }
+
+/* Animation riêng cho nội dung popup (form) để tạo hiệu ứng nảy nhẹ đẹp mắt */
+.overlay .auth-form {
+    animation: modalPopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalPopIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes viewFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
