@@ -191,6 +191,10 @@ const UIController = {
         const loginIntro = document.getElementById('login-intro-text');
         if (loginIntro) loginIntro.style.display = 'none';
 
+        // Ẩn nút quay lại màn hình chào mừng để tránh nhầm lẫn
+        const authBackLink = document.getElementById('auth-back-link');
+        if (authBackLink) authBackLink.style.display = 'none';
+
         // Lấy các element của form
         const title = document.getElementById('auth-title');
         const nameInput = document.getElementById('auth-name');
@@ -249,14 +253,80 @@ const UIController = {
     },
 
     /**
+     * Hiển thị màn hình chào mừng (Intro + 2 Nút chọn)
+     */
+    showWelcomeScreen() {
+        // Ẩn các input và nút submit cũ
+        document.getElementById('auth-name').style.display = 'none';
+        document.getElementById('auth-pass').style.display = 'none';
+        document.getElementById('auth-pass-confirm').style.display = 'none';
+        const pass2 = document.getElementById('auth-pass-2');
+        if (pass2) pass2.style.display = 'none';
+        
+        document.getElementById('auth-submit-btn').style.display = 'none';
+        document.getElementById('auth-switch-link').style.display = 'none';
+        document.getElementById('auth-title').textContent = 'Chào Mừng';
+
+        // Đảm bảo intro text hiện
+        const loginIntro = document.getElementById('login-intro-text');
+        if (loginIntro) loginIntro.style.display = 'block';
+
+        // Tạo hoặc hiển thị container chứa 2 nút mới
+        let welcomeOpts = document.getElementById('welcome-options');
+        if (!welcomeOpts) {
+            welcomeOpts = document.createElement('div');
+            welcomeOpts.id = 'welcome-options';
+            welcomeOpts.style.cssText = 'display: flex; flex-direction: column; gap: 15px; margin-top: 10px;';
+            welcomeOpts.innerHTML = `
+                <button class="btn-main" data-action="play-guest" style="background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);">🎮 Chơi Ngay</button>
+                <button class="btn-main" data-action="show-login" style="background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);">👤 Đăng Nhập</button>
+            `;
+            // Chèn vào sau intro text
+            const form = document.querySelector('.auth-form');
+            if (loginIntro && loginIntro.parentNode === form) {
+                form.insertBefore(welcomeOpts, loginIntro.nextSibling);
+            } else {
+                form.appendChild(welcomeOpts);
+            }
+        }
+        welcomeOpts.style.display = 'flex';
+    },
+
+    /**
+     * Hiển thị form đăng nhập (khi bấm nút Đăng Nhập)
+     */
+    showLoginForm() {
+        const welcomeOpts = document.getElementById('welcome-options');
+        if (welcomeOpts) welcomeOpts.style.display = 'none';
+
+        // Gọi lại resetAuthViewToDefault nhưng bỏ qua bước showWelcomeScreen để hiện form
+        this.resetAuthViewToDefault(true); 
+    },
+
+    /**
      * Đưa form đăng nhập/đăng ký về trạng thái mặc định (chế độ Đăng nhập).
      */
-    resetAuthViewToDefault() {
+    resetAuthViewToDefault(showFormDirectly = false) {
         const submitBtn = document.getElementById('auth-submit-btn');
         const nameInput = document.getElementById('auth-name');
+        const backLink = document.getElementById('auth-back-link');
         
         // Fix: Luôn hiển thị lại ô nhập tên (vì có thể bị ẩn bởi chức năng Đổi mật khẩu)
-        if (nameInput) nameInput.style.display = 'block';
+        if (nameInput) nameInput.style.display = showFormDirectly ? 'block' : 'none';
+
+        // Các phần tử khác
+        const passInput = document.getElementById('auth-pass');
+        const switchLink = document.getElementById('auth-switch-link');
+        
+        if (showFormDirectly) {
+            if (passInput) passInput.style.display = 'block';
+            if (submitBtn) submitBtn.style.display = 'block';
+            if (switchLink) switchLink.style.display = 'block';
+            if (backLink) backLink.style.display = 'block';
+            document.getElementById('auth-title').textContent = 'Đăng Nhập';
+        } else {
+            if (backLink) backLink.style.display = 'none';
+        }
 
         // Ẩn nội dung giới thiệu nếu có
         const introText = document.getElementById('app-intro-text');
@@ -273,6 +343,11 @@ const UIController = {
             this.switchAuthMode();
         }
         this.clearAuthForm();
+
+        // Nếu không yêu cầu hiện form trực tiếp, hiển thị màn hình chào mừng (2 nút)
+        if (!showFormDirectly) {
+            this.showWelcomeScreen();
+        }
     },
 
     /**
