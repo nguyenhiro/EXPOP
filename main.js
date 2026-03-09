@@ -146,6 +146,17 @@ const UserActions = {
     },
 
     /**
+     * Chơi ngay không cần tài khoản
+     */
+    playAsGuest() {
+        AppState.state.currentUser = null; // Đảm bảo không có user
+        // Không lưu state để lần sau vào lại vẫn hỏi
+        ViewController.switchView('home-view');
+        UIController.updateUserStatus(null);
+        UIController.renderHomeExtras();
+    },
+
+    /**
      * Handle logout
      */
     logout() {
@@ -536,6 +547,9 @@ const App = {
             switch (action) {
                 // Auth
                 case 'login': UserActions.login(); break;
+                case 'play-guest': UserActions.playAsGuest(); break;
+                case 'show-login': UIController.showLoginForm(); break;
+                case 'back-to-welcome': UIController.resetAuthViewToDefault(); break;
                 case 'register': UserActions.register(); break;
                 case 'logout': UserActions.logout(); break;
                 case 'switch-auth-mode': UIController.switchAuthMode(); break;
