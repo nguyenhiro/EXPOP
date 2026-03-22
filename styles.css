@@ -665,3 +665,31 @@ body {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* SPLASH SCREEN INTRO */
+#app-intro-splash {
+    position: absolute; inset: 0;
+    background: #020617; z-index: 10000;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    animation: splashFadeOut 0.5s ease-in-out 2.5s forwards;
+}
+#app-intro-splash img {
+    width: 140px; height: 140px;
+    border-radius: 28px;
+    box-shadow: 0 0 50px rgba(56, 189, 248, 0.3);
+    object-fit: cover;
+    animation: logoEntrance 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#app-intro-splash h2 {
+    margin-top: 25px;
+    font-size: 2rem; font-weight: 900; letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    opacity: 0;
+    animation: textSlideUp 0.6s ease-out 0.5s forwards;
+}
+
+@keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
+@keyframes logoEntrance { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes textSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
