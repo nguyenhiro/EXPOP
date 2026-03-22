@@ -515,6 +515,9 @@ const App = {
         // Show the correct main view (login or home)
         this.showMainView();
 
+        // Hiển thị intro splash screen
+        UIController.showSplashScreen();
+
         // Setup event listeners
         this.setupEventListeners();
 
