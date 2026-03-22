@@ -5,6 +5,26 @@
 // ==================== UI CONTROLLER ====================
 const UIController = {
     /**
+     * Hiển thị màn hình Intro (Splash Screen) với logo expopxo.jpg
+     */
+    showSplashScreen() {
+        const splashHTML = `
+            <div id="app-intro-splash">
+                <img src="expopxo.jpg" alt="EXPOP XO">
+                <h2>EXPOP XO</h2>
+            </div>
+        `;
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer) {
+            appContainer.insertAdjacentHTML('beforeend', splashHTML);
+            setTimeout(() => {
+                const splash = document.getElementById('app-intro-splash');
+                if (splash) splash.remove();
+            }, 3000);
+        }
+    },
+
+    /**
      * Hiển thị thông báo toast
      */
     showToast(message, type = 'info') {
